@@ -14,6 +14,7 @@ spring:
 
 mybatis-plus:
   configuration:
+    # 避免MP自动将 Java 实体类中的驼峰命名字段（userAccount）转换为下划线命名字段（注：数据库字段也是驼峰命名格式）
     map-underscore-to-camel-case: false
     # 仅在开发环境开启日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
