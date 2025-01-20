@@ -3,13 +3,15 @@ package com.tune.picturebackend.exception;
 import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
 @RestControllerAdvice
 @Slf4j
+@Order(3)
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(BusinessException.class)
     public BaseResponse<?> businessExceptionHandler(BusinessException e) {
         log.error("BusinessException", e);
