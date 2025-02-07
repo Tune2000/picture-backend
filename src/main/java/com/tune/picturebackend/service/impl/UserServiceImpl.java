@@ -89,14 +89,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getLoginUser() {
-        User currentUser = (User)StpUtil.getSession().get("loginUser");
-        // 从数据库查询（追求性能的话可以注释，直接返回上述结果）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        return currentUser;
+        // User currentUser = (User)StpUtil.getSession().get("loginUser");
+        // // 从数据库查询（追求性能的话可以注释，直接返回上述结果）
+        // long userId = currentUser.getId();
+        // currentUser = this.getById(userId);
+        // if (currentUser == null) {
+        //     throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        // }
+        // return currentUser;
+
+        return (User)StpUtil.getSession().get("loginUser");
     }
 
     @Override
