@@ -7,12 +7,10 @@ import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.common.ResultUtils;
 import com.tune.picturebackend.constant.UserConstant;
+import com.tune.picturebackend.enums.PictureReviewStatusEnum;
 import com.tune.picturebackend.exception.ErrorCode;
 import com.tune.picturebackend.exception.ThrowUtils;
-import com.tune.picturebackend.model.dto.picture.PictureEditRequest;
-import com.tune.picturebackend.model.dto.picture.PictureQueryRequest;
-import com.tune.picturebackend.model.dto.picture.PictureUpdateRequest;
-import com.tune.picturebackend.model.dto.picture.PictureUploadRequest;
+import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureTagCategory;
@@ -59,10 +57,19 @@ public class PictureController {
     }
 
     /**
+     * 通过 URL 上传图片（可重新上传）
+     */
+    @PostMapping("/upload/url")
+    public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest) {
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest);
+        return ResultUtils.success(pictureVO);
+    }
+
+    /**
      * 上传图片（可重新上传）
      */
     @PostMapping("/upload")
-    @SaCheckRole(value = {UserConstant.ADMIN_ROLE, UserConstant.ROOT_ROLE}, mode = SaMode.OR)
     public BaseResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest) {
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest);
         return ResultUtils.success(pictureVO);
@@ -136,6 +143,8 @@ public class PictureController {
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        // 普通用户默认只能查看已过审的数据
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         // 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
         // 获取封装类
@@ -159,5 +168,20 @@ public class PictureController {
         pictureTagCategory.setTagList(tagList);
         pictureTagCategory.setCategoryList(categoryList);
         return ResultUtils.success(pictureTagCategory);
+    }
+
+    @PostMapping("/review")
+    @SaCheckRole(value = {UserConstant.ADMIN_ROLE, UserConstant.ROOT_ROLE}, mode = SaMode.OR)
+    public BaseResponse<Boolean> doPictureReview(@RequestBody @Valid PictureReviewRequest pictureReviewRequest) {
+        pictureService.doPictureReview(pictureReviewRequest);
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/upload/batch")
+    @SaCheckRole(value = {UserConstant.ADMIN_ROLE, UserConstant.ROOT_ROLE}, mode = SaMode.OR)
+    public BaseResponse<Integer> uploadPictureByBatch(@RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest);
+        return ResultUtils.success(uploadCount);
     }
 }

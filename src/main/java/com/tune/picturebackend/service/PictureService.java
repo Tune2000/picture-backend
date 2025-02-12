@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tune.picturebackend.common.DeleteRequest;
-import com.tune.picturebackend.model.dto.picture.PictureEditRequest;
-import com.tune.picturebackend.model.dto.picture.PictureQueryRequest;
-import com.tune.picturebackend.model.dto.picture.PictureUpdateRequest;
-import com.tune.picturebackend.model.dto.picture.PictureUploadRequest;
+import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureVO;
@@ -22,11 +19,11 @@ public interface PictureService extends IService<Picture> {
     /**
      * 上传图片
      *
-     * @param multipartFile
+     * @param inputSource 文件输入源
      * @param pictureUploadRequest
      * @return
      */
-    PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest);
+    PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest);
 
     /**
      * 上传头像
@@ -90,4 +87,27 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     boolean editPicture(PictureEditRequest pictureEditRequest);
+
+    /**
+     * 图片审核
+     *
+     * @param pictureReviewRequest
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest);
+
+    /**
+     * 填充审核参数
+     *
+     * @param picture
+     */
+    void fillReviewParams(Picture picture);
+
+    /**
+     * 批量抓取和创建图片
+     *
+     * @param pictureUploadByBatchRequest
+     * @return 成功创建的图片数
+     */
+    int uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest);
+
 }
