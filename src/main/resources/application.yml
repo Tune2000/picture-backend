@@ -8,6 +8,7 @@ spring:
     multipart:
       max-file-size: 10MB
   profiles:
+    # 本地开发环境，不新建配置 application-local.yml 时可去掉
     active: local
   application:
     name: picture-backend
@@ -17,6 +18,25 @@ spring:
     url: jdbc:mysql://localhost:3306/picture?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 135288
+
+  # Redis 配置
+  # 新建 application-local.yml 添加具体设置
+  redis:
+    database: 0
+    port: 6379
+    host: your host
+    password: your password
+    timeout: 5000
+
+# 对象存储配置（需要从腾讯云获取）
+# 新建 application-local.yml 添加具体设置
+cos:
+  client:
+    host: your host
+    secretId: your secretId
+    secretKey: your secretKey
+    region: your region
+    bucket: your bucket
 
 mybatis-plus:
   configuration:

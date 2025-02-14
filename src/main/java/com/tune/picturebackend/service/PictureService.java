@@ -58,6 +58,14 @@ public interface PictureService extends IService<Picture> {
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
 
     /**
+     * 获取图片分页（缓存优化）
+     *
+     * @param pictureQueryRequest
+     * @return
+     */
+    Page<PictureVO> getPictureVoPageWithCache(PictureQueryRequest pictureQueryRequest);
+
+    /**
      * 验证图片
      *
      * @param picture
@@ -110,4 +118,10 @@ public interface PictureService extends IService<Picture> {
      */
     int uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest);
 
+    /**
+     * 清理图片文件
+     *
+     * @param oldPicture
+     */
+    void clearPictureFile(Picture oldPicture);
 }

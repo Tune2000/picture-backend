@@ -152,6 +152,14 @@ public class PictureController {
     }
 
     /**
+     * 分页获取图片列表（封装类，缓存优化）
+     */
+    @PostMapping("/list/page/vo/cache")
+    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest) {
+        Page<PictureVO> pictureVOPage = pictureService.getPictureVoPageWithCache(pictureQueryRequest);
+        return ResultUtils.success(pictureVOPage);
+    }
+    /**
      * 编辑图片（给用户使用）
      */
     @PostMapping("/edit")
