@@ -2,16 +2,20 @@ package com.tune.picturebackend.controller.picture;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.common.ResultUtils;
 import com.tune.picturebackend.constant.UserConstant;
 import com.tune.picturebackend.enums.PictureReviewStatusEnum;
+import com.tune.picturebackend.exception.BusinessException;
 import com.tune.picturebackend.exception.ErrorCode;
 import com.tune.picturebackend.exception.ThrowUtils;
 import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
+import com.tune.picturebackend.model.entity.Space;
+import com.tune.picturebackend.model.entity.User;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureTagCategory;
 import com.tune.picturebackend.model.vo.picture.PictureVO;
@@ -80,8 +84,8 @@ public class PictureController {
      */
     @PostMapping("/delete")
     public BaseResponse<Boolean> deletePicture(@RequestBody @Valid DeleteRequest deleteRequest) {
-        boolean result = pictureService.deletePicture(deleteRequest);
-        return ResultUtils.success(result);
+        pictureService.deletePicture(deleteRequest);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -92,6 +96,15 @@ public class PictureController {
     public BaseResponse<Boolean> updatePicture(@RequestBody @Valid PictureUpdateRequest pictureUpdateRequest) {
         boolean result = pictureService.updatePicture(pictureUpdateRequest);
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 编辑图片（给用户使用）
+     */
+    @PostMapping("/edit")
+    public BaseResponse<Boolean> editPicture(@RequestBody @Valid PictureEditRequest pictureEditRequest) {
+        pictureService.editPicture(pictureEditRequest);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -117,6 +130,8 @@ public class PictureController {
         // 查询数据库
         Picture picture = pictureService.getById(id);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+        // 空间权限校验
+        pictureService.checkPictureAuth(picture);
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVO(picture));
     }
@@ -143,8 +158,8 @@ public class PictureController {
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        // 普通用户默认只能查看已过审的数据
-        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+        // 空间权限校验
+        pictureService.checkSpaceAuth(pictureQueryRequest);
         // 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
         // 获取封装类
@@ -154,18 +169,11 @@ public class PictureController {
     /**
      * 分页获取图片列表（封装类，缓存优化）
      */
+    @Deprecated
     @PostMapping("/list/page/vo/cache")
     public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest) {
         Page<PictureVO> pictureVOPage = pictureService.getPictureVoPageWithCache(pictureQueryRequest);
         return ResultUtils.success(pictureVOPage);
-    }
-    /**
-     * 编辑图片（给用户使用）
-     */
-    @PostMapping("/edit")
-    public BaseResponse<Boolean> editPicture(@RequestBody @Valid PictureEditRequest pictureEditRequest) {
-        boolean result = pictureService.editPicture(pictureEditRequest);
-        return ResultUtils.success(result);
     }
 
     @GetMapping("/tag_category")

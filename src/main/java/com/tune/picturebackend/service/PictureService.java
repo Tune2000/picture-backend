@@ -78,7 +78,7 @@ public interface PictureService extends IService<Picture> {
      * @param deleteRequest
      * @return
      */
-    boolean deletePicture(DeleteRequest deleteRequest);
+    void deletePicture(DeleteRequest deleteRequest);
 
     /**
      * 更新图片
@@ -94,7 +94,21 @@ public interface PictureService extends IService<Picture> {
      * @param pictureEditRequest
      * @return
      */
-    boolean editPicture(PictureEditRequest pictureEditRequest);
+    void editPicture(PictureEditRequest pictureEditRequest);
+
+    /**
+     * 检查图片权限
+     *
+     * @param picture
+     */
+    void checkPictureAuth(Picture picture);
+
+    /**
+     * 检查空间权限
+     *
+     * @param pictureQueryRequest
+     */
+    void checkSpaceAuth(PictureQueryRequest pictureQueryRequest);
 
     /**
      * 图片审核

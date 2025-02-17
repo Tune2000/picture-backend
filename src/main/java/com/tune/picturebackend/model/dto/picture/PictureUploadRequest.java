@@ -22,9 +22,9 @@ public class PictureUploadRequest implements Serializable {
     private String picName;
 
     /**
-     * 名称前缀
+     * 空间 id
      */
-    private String namePrefix;
+    private Long spaceId;
 
 
     private static final long serialVersionUID = 1L;  
