@@ -2,20 +2,15 @@ package com.tune.picturebackend.controller.picture;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.common.ResultUtils;
 import com.tune.picturebackend.constant.UserConstant;
-import com.tune.picturebackend.enums.PictureReviewStatusEnum;
-import com.tune.picturebackend.exception.BusinessException;
 import com.tune.picturebackend.exception.ErrorCode;
 import com.tune.picturebackend.exception.ThrowUtils;
 import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
-import com.tune.picturebackend.model.entity.Space;
-import com.tune.picturebackend.model.entity.User;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureTagCategory;
 import com.tune.picturebackend.model.vo.picture.PictureVO;
@@ -25,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
@@ -199,5 +195,25 @@ public class PictureController {
         ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
         int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest);
         return ResultUtils.success(uploadCount);
+    }
+
+    /**
+     * 根据颜色搜索图片
+     */
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody @Valid SearchPictureByColorRequest searchPictureByColorRequest) {
+        String picColor = searchPictureByColorRequest.getPicColor();
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        List<PictureVO> result = pictureService.searchPictureByColor(spaceId, picColor);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 批量编辑图片
+     */
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureByBatch(@RequestBody @Valid PictureEditByBatchRequest pictureEditByBatchRequest) {
+        pictureService.editPictureByBatch(pictureEditByBatchRequest);
+        return ResultUtils.success(true);
     }
 }

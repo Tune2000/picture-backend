@@ -8,7 +8,10 @@ import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureVO;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 /**
@@ -133,9 +136,25 @@ public interface PictureService extends IService<Picture> {
     int uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest);
 
     /**
+     * 批量编辑图片
+     *
+     * @param pictureEditByBatchRequest
+     */
+    void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest);
+
+    /**
      * 清理图片文件
      *
      * @param oldPicture
      */
     void clearPictureFile(Picture oldPicture);
+
+    /**
+     * 根据颜色搜索图片
+     *
+     * @param spaceId
+     * @param picColor
+     * @return
+     */
+    List<PictureVO> searchPictureByColor(Long spaceId, String picColor);
 }
