@@ -73,7 +73,15 @@ public class UrlPictureUpload extends PictureUploadTemplate {
         String fileUrl = (String) inputSource;  
         // 从 URL 中提取文件名
         // "example.jpg"
-        return FileUtil.getName(fileUrl);
+        // return FileUtil.getName(fileUrl);
+        // 去掉 URL 中的查询参数部分，保留文件名
+        int queryIndex = fileUrl.indexOf("?");
+        if (queryIndex != -1) {
+        // 如果存在查询参数，截取文件名部分
+            fileUrl = fileUrl.substring(0, queryIndex);
+        }
+        System.out.println(fileUrl);
+        return fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
     }  
   
     @Override  

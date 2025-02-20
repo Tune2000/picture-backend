@@ -14,6 +14,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.tune.picturebackend.api.aliyunai.AliYunAiApi;
+import com.tune.picturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.tune.picturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.constant.UserConstant;
 import com.tune.picturebackend.enums.PictureReviewStatusEnum;
@@ -101,6 +104,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                     .expireAfterWrite(5L, TimeUnit.MINUTES)
                     .build();
 
+    @Resource
+ 	private AliYunAiApi aliYunAiApi;
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest) {
         User loginUser = (User) StpUtil.getSession().get("loginUser");
@@ -394,13 +399,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             // 操作数据库
             boolean result = this.removeById(pictureId);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-            // 更新空间的使用额度
-            boolean update = spaceService.lambdaUpdate()
-                    .eq(Space::getId, oldPicture.getSpaceId())
-                    .setSql("totalSize = totalSize - " + oldPicture.getPicSize())
-                    .setSql("totalCount = totalCount - 1")
-                    .update();
-            ThrowUtils.throwIf(!update, ErrorCode.OPERATION_ERROR, "额度更新失败");
+            if (oldPicture.getSpaceId() != null) {
+                // 更新空间的使用额度
+                boolean update = spaceService.lambdaUpdate()
+                        .eq(Space::getId, oldPicture.getSpaceId())
+                        .setSql("totalSize = totalSize - " + oldPicture.getPicSize())
+                        .setSql("totalCount = totalCount - 1")
+                        .update();
+                ThrowUtils.throwIf(!update, ErrorCode.OPERATION_ERROR, "额度更新失败");
+            }
             return true;
         });
         // 异步清理图片文件
@@ -755,6 +762,22 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 .map(PictureVO::objToVo)
                 .collect(Collectors.toList());
     }
+    @Override
+    public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest) {
+        // 获取图片信息
+       Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
+       Picture picture = Optional.ofNullable(this.getById(pictureId)).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+       // 权限校验
+       checkPictureAuth(picture);
+       // 构造请求参数
+       CreateOutPaintingTaskRequest taskRequest = new CreateOutPaintingTaskRequest();
+       CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
+       input.setImageUrl(picture.getUrl());
+       taskRequest.setInput(input);
+       BeanUtil.copyProperties(createPictureOutPaintingTaskRequest, taskRequest);
+       // 创建任务
+       return aliYunAiApi.createOutPaintingTask(taskRequest);
+   }
 
 
 }

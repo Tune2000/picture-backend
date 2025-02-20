@@ -3,6 +3,7 @@ package com.tune.picturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tune.picturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
@@ -157,4 +158,13 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     List<PictureVO> searchPictureByColor(Long spaceId, String picColor);
+
+    /**
+     * AI 扩展图片服务
+     *
+     * @param createPictureOutPaintingTaskRequest
+     * @return
+     */
+    CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest);
+
 }

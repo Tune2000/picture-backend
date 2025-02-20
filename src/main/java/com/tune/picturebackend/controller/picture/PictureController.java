@@ -2,11 +2,16 @@ package com.tune.picturebackend.controller.picture;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tune.picturebackend.api.aliyunai.AliYunAiApi;
+import com.tune.picturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.tune.picturebackend.api.aliyunai.model.GetOutPaintingTaskResponse;
 import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.common.ResultUtils;
 import com.tune.picturebackend.constant.UserConstant;
+import com.tune.picturebackend.exception.BusinessException;
 import com.tune.picturebackend.exception.ErrorCode;
 import com.tune.picturebackend.exception.ThrowUtils;
 import com.tune.picturebackend.model.dto.picture.*;
@@ -20,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +41,8 @@ public class PictureController {
     @Resource
     private PictureService pictureService;
 
+    @Resource
+    private AliYunAiApi aliYunAiApi;
     /**
      * 上传头像
      *
@@ -215,5 +221,28 @@ public class PictureController {
     public BaseResponse<Boolean> editPictureByBatch(@RequestBody @Valid PictureEditByBatchRequest pictureEditByBatchRequest) {
         pictureService.editPictureByBatch(pictureEditByBatchRequest);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 创建 AI 扩图任务
+     */
+    @PostMapping("/out_painting/create_task")
+    public BaseResponse<CreateOutPaintingTaskResponse> createPictureOutPaintingTask(
+            @RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest) {
+        if (createPictureOutPaintingTaskRequest == null || createPictureOutPaintingTaskRequest.getPictureId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        CreateOutPaintingTaskResponse response = pictureService.createPictureOutPaintingTask(createPictureOutPaintingTaskRequest);
+        return ResultUtils.success(response);
+    }
+
+    /**
+     * 查询 AI 扩图任务
+     */
+    @GetMapping("/out_painting/get_task")
+    public BaseResponse<GetOutPaintingTaskResponse> getPictureOutPaintingTask(String taskId) {
+        ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR);
+        GetOutPaintingTaskResponse task = aliYunAiApi.getOutPaintingTask(taskId);
+        return ResultUtils.success(task);
     }
 }
