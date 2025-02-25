@@ -2,30 +2,25 @@ package com.tune.picturebackend.controller.space;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tune.picturebackend.common.BaseResponse;
 import com.tune.picturebackend.common.DeleteRequest;
 import com.tune.picturebackend.common.ResultUtils;
 import com.tune.picturebackend.constant.UserConstant;
 import com.tune.picturebackend.enums.SpaceLevelEnum;
-import com.tune.picturebackend.exception.BusinessException;
 import com.tune.picturebackend.exception.ErrorCode;
 import com.tune.picturebackend.exception.ThrowUtils;
+import com.tune.picturebackend.manager.auth.SpaceUserAuthManager;
 import com.tune.picturebackend.model.dto.space.*;
 import com.tune.picturebackend.model.entity.Space;
-import com.tune.picturebackend.model.entity.User;
 import com.tune.picturebackend.model.vo.space.SpaceVO;
 import com.tune.picturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,8 +35,11 @@ public class SpaceController {
     @Resource
     private SpaceService spaceService;
 
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
+
     @PostMapping("/add")
-    public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest) {
+    public BaseResponse<Long> addSpace(@RequestBody @Valid SpaceAddRequest spaceAddRequest) {
         long spaceId = spaceService.addSpace(spaceAddRequest);
         return ResultUtils.success(spaceId);
     }
@@ -92,7 +90,11 @@ public class SpaceController {
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVO(space));
+        SpaceVO spaceVO = spaceService.getSpaceVO(space);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space);
+        spaceVO.setPermissionList(permissionList);
+
+        return ResultUtils.success(spaceVO);
     }
 
     /**

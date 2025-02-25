@@ -9,7 +9,6 @@ import com.tune.picturebackend.model.dto.picture.*;
 import com.tune.picturebackend.model.entity.Picture;
 import com.tune.picturebackend.model.vo.picture.LocalAvatarUploadVO;
 import com.tune.picturebackend.model.vo.picture.PictureVO;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -99,20 +98,6 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     void editPicture(PictureEditRequest pictureEditRequest);
-
-    /**
-     * 检查图片权限
-     *
-     * @param picture
-     */
-    void checkPictureAuth(Picture picture);
-
-    /**
-     * 检查空间权限
-     *
-     * @param pictureQueryRequest
-     */
-    void checkSpaceAuth(PictureQueryRequest pictureQueryRequest);
 
     /**
      * 图片审核
